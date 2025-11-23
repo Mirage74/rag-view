@@ -1,16 +1,46 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { createAuthEntity } from "../models/authEntity";
+
+import {
+  fetchRegisterUser,
+  USER_NAME_UNDEFINED,
+  USER_EMAIL_UNDEFINED,
+} from "../features/userDetailsSlice";
 
 function RegisterPage() {
   const [login, setLogin] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
-  const [authEntity, setAuthEntity] = useState(null);
+
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+  const { userName, userEmail, loading, error } = useSelector(
+    (state) => state.userDetails
+  );
+
+  useEffect(() => {
+    if (
+      !loading &&
+      userName !== USER_NAME_UNDEFINED &&
+      userEmail !== USER_EMAIL_UNDEFINED
+    ) {
+      navigate("/rag");
+    }
+  }, [loading, userName, userEmail, navigate]);
+
+  useEffect(() => {
+    if (error) {
+      setLogin("");
+      setEmail("");
+      setPassword("");
+      setConfirm("");
+    }
+  }, [error]);
+
+  const handleSubmit = (e) => {
     e.preventDefault();
 
     if (password !== confirm) {
@@ -25,34 +55,7 @@ function RegisterPage() {
       confirmPassword: confirm,
     };
 
-    try {
-      const response = await fetch("http://localhost:8080/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        const text = await response.text();
-        console.error("Register failed:", text);
-        alert("Registration failed");
-        return;
-      }
-
-      const raw = await response.json();
-      const entity = createAuthEntity(raw);
-
-      setAuthEntity(entity);
-
-      if (entity && entity.payload.token) {
-        localStorage.setItem("jwt", entity.payload.token);
-      }
-
-      navigate("/");
-    } catch (err) {
-      console.error("Request error:", err);
-      alert("Network error");
-    }
+    dispatch(fetchRegisterUser(payload));
   };
 
   return (
@@ -64,6 +67,10 @@ function RegisterPage() {
         <p className="text-sm text-slate-400 text-center mb-6">
           Create a new account by choosing a login, email and a strong password.
         </p>
+
+        {error && (
+          <div className="mb-4 text-sm text-red-400 text-center">{error}</div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="space-y-2">
@@ -127,17 +134,12 @@ function RegisterPage() {
 
           <button
             type="submit"
-            className="w-full mt-2 inline-flex items-center justify-center rounded-xl bg-indigo-500 hover:bg-indigo-400 active:bg-indigo-600 transition-colors px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30"
+            disabled={loading}
+            className="w-full mt-2 inline-flex items-center justify-center rounded-xl bg-indigo-500 hover:bg-indigo-400 disabled:opacity-60 disabled:cursor-not-allowed active:bg-indigo-600 transition-colors px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30"
           >
-            Register
+            {loading ? "Registering..." : "Register"}
           </button>
         </form>
-
-        {authEntity && (
-          <p className="mt-4 text-xs text-slate-400">
-            Server message: {authEntity.message}
-          </p>
-        )}
       </div>
     </div>
   );
