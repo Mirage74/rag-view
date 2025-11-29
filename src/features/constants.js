@@ -1,0 +1,19 @@
+export const BASE_URL = "http://localhost:8080";
+export const METHOD_POST_QUERY = "POST";
+export const HEADER_CONTENT_TYPE = "Content-Type";
+export const JWT_TOKEN = "jwt";
+export const JWT_REFRESH_TOKEN = "jwt-refresh";
+export const APPLICATION_JSON = "application/json";
+export const USER_NAME_UNDEFINED = "userNameUndefined";
+export const USER_EMAIL_UNDEFINED = "userEmailUndefined";
+export const ERROR_RESPONSE_NOT_OK = "Response not ok";
+export const ERROR_NO_RESPONSE = "No response from server";
+export const PREFIX_AUTH  = "/auth";
+export const PREFIX_REGISTER  = "/register";
+export const PREFIX_LOGIN  = "/login";
+export const PREFIX_DOCUMENT = "/documents"; 
+export const PREFIX_UPLOAD = "/upload";
+export const FORM_DATA_FILES = "files";
+export const TYPE_WINDOW_UNDEFINED = "undefined";
+export const TOKEN_UNDEFINED = "undefined";
+

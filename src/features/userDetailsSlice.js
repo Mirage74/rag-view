@@ -1,21 +1,34 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { createSlice } from "@reduxjs/toolkit";
+import { BASE_URL } from "./constants";
+import {
+  METHOD_POST_QUERY,
+  HEADER_CONTENT_TYPE,
+  USER_NAME_UNDEFINED,
+  USER_EMAIL_UNDEFINED,
+  JWT_TOKEN,
+  JWT_REFRESH_TOKEN,
+  PREFIX_AUTH,
+  PREFIX_REGISTER,
+  APPLICATION_JSON,
+  ERROR_RESPONSE_NOT_OK,
+  TYPE_WINDOW_UNDEFINED,
+  TOKEN_UNDEFINED,
+  ERROR_NO_RESPONSE} from "./constants";
 
-export const USER_NAME_UNDEFINED = "userNameUndefined";
-export const USER_EMAIL_UNDEFINED = "userEmailUndefined";
-const ERROR_RESPONSE_NOT_OK = "Response not ok";
-const ERROR_NO_RESPONSE = "No response from server";
-const BASE_URL = "http://localhost:8080";
-const PREFIX_REGISTER  = "/auth/register";
-const METHOD_POST_QUERY = "POST";
-const APPLICATION_JSON = "application/json";
-const HEADER_CONTENT_TYPE = "Content-Type";
-const JWT_TOKEN = "jwt";
-const JWT_REFRESH_TOKEN = "jwt-refresh";
+  const getInitialToken = () => {
+    if (typeof window === TYPE_WINDOW_UNDEFINED) return null;
+
+    const token = localStorage.getItem(JWT_TOKEN);
+    if (!token || token === TOKEN_UNDEFINED) return null;
+    return token;
+};
 
 const initialState = {
   userName: USER_NAME_UNDEFINED,
   userEmail: USER_EMAIL_UNDEFINED,
+  token: getInitialToken(),
+  refreshToken: localStorage.getItem(JWT_REFRESH_TOKEN),
   loading: false,
   error: null
 };
@@ -24,7 +37,7 @@ export const fetchRegisterUser = createAsyncThunk(
   "userDetails/fetchRegisterUser",
   async (payload, { rejectWithValue }) => {
     try {
-      const res = await fetch(BASE_URL + PREFIX_REGISTER, {
+      const res = await fetch(BASE_URL + PREFIX_AUTH + PREFIX_REGISTER, {
         method: METHOD_POST_QUERY,
         headers: { [HEADER_CONTENT_TYPE]: APPLICATION_JSON },
         body: JSON.stringify(payload),
@@ -51,10 +64,16 @@ export const fetchRegisterUser = createAsyncThunk(
 const userDetailsSlice = createSlice({
   name: "userDetails",
   initialState,
-  reducers: {
-    logoutUser() {
-      return initialState;
-    },
+ reducers: {
+    logoutUser(state) {
+      state.userName = USER_NAME_UNDEFINED;
+      state.userEmail = USER_EMAIL_UNDEFINED;
+      state.token = null;
+      state.loading = false;
+      state.error = null;
+      localStorage.removeItem(JWT_TOKEN);
+      localStorage.removeItem(JWT_REFRESH_TOKEN);
+    }
   },
   extraReducers: (builder) => {
     builder.addCase(fetchRegisterUser.pending, (state) => {
@@ -66,6 +85,21 @@ const userDetailsSlice = createSlice({
       state.error = null;
       state.userName = action.payload.payload.username;
       state.userEmail = action.payload.payload.email;
+      const token = action.payload.payload.token;
+      state.token = token || null;
+      if (token) {
+        localStorage.setItem(JWT_TOKEN, token);
+      } else {
+        localStorage.removeItem(JWT_TOKEN);
+      }
+      const refreshToken = action.payload.payload.refreshToken;
+      state.refreshToken = refreshToken || null;
+      if (refreshToken) {
+        localStorage.setItem(JWT_REFRESH_TOKEN, refreshToken);
+      } else {
+        localStorage.removeItem(JWT_REFRESH_TOKEN);
+      }
+
       localStorage.setItem(JWT_TOKEN, action.payload.payload.token);
       localStorage.setItem(JWT_REFRESH_TOKEN, action.payload.payload.refreshToken);
     });

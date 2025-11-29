@@ -1,24 +1,21 @@
-import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-function hasToken() {
-  return typeof window !== "undefined" && Boolean(localStorage.getItem("jwt"));
-}
+import { useDispatch, useSelector } from "react-redux";
+import { logoutUser } from "../features/userDetailsSlice";
+import { TOKEN_UNDEFINED } from "../features/constants";
 
 function HomePage() {
-  const [auth, setAuth] = useState(hasToken());
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const handler = () => setAuth(hasToken());
-    window.addEventListener("storage", handler);
-    return () => window.removeEventListener("storage", handler);
-  }, []);
+  const token = useSelector((state) => state.userDetails.token);
+  //const auth = Boolean(token);
+  const auth =
+    typeof token === "string" &&
+    token !== TOKEN_UNDEFINED &&
+    token.trim() !== "";
 
   const handleLogout = () => {
-    localStorage.removeItem("jwt");
-    setAuth(false);
-    navigate("/");
+    dispatch(logoutUser());
   };
 
   return (
