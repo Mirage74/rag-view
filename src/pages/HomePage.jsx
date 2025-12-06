@@ -70,11 +70,6 @@ function HomePage() {
             </button>
           </div>
         )}
-
-        <p className="mt-6 text-[11px] text-slate-500">
-          Authentication state is determined by the presence of a JWT token in
-          localStorage.
-        </p>
       </div>
     </div>
   );

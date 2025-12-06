@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { fetchRegisterUser } from "../features/userDetailsSlice";
+import fetchRegisterUser from "../features/fetch-async/fetchRegisterUser";
 import {
   USER_NAME_UNDEFINED,
   USER_EMAIL_UNDEFINED,

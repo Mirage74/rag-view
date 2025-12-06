@@ -1,4 +1,8 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { useEffect, useRef } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import fetchUserProfile from "./features/fetch-async/fetchUserProfile";
+import { TOKEN_UNDEFINED } from "./features/constants";
 
 import RootLayout from "./pages/RootLayout";
 import HomePage from "./pages/HomePage";
@@ -24,6 +28,20 @@ const router = createBrowserRouter([
 ]);
 
 function App() {
+  const dispatch = useDispatch();
+  const token = useSelector((state) => state.userDetails.token);
+  const bootstrappedRef = useRef(false);
+
+  const auth =
+    typeof token === "string" &&
+    token !== TOKEN_UNDEFINED &&
+    token.trim() !== "";
+
+  useEffect(() => {
+    if (!auth || bootstrappedRef.current) return;
+    bootstrappedRef.current = true;
+    dispatch(fetchUserProfile());
+  }, [auth, dispatch]);
   return <RouterProvider router={router} />;
 }
 

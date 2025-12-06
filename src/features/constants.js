@@ -1,5 +1,6 @@
 export const BASE_URL = "http://localhost:8080";
 export const METHOD_POST_QUERY = "POST";
+export const METHOD_GET_QUERY = "GET";
 export const HEADER_CONTENT_TYPE = "Content-Type";
 export const JWT_TOKEN = "jwt";
 export const JWT_REFRESH_TOKEN = "jwt-refresh";
@@ -9,8 +10,11 @@ export const USER_EMAIL_UNDEFINED = "userEmailUndefined";
 export const ERROR_RESPONSE_NOT_OK = "Response not ok";
 export const ERROR_NO_RESPONSE = "No response from server";
 export const PREFIX_AUTH = "/auth";
+export const PREFIX_USERS = "/users";
+export const PREFIX_USERINFO = "/userinfo";
 export const PREFIX_REGISTER = "/register";
 export const PREFIX_LOGIN = "/login";
+export const PREFIX_REFRESH_TOKEN = "/refresh/token";
 export const PREFIX_DOCUMENT = "/documents";
 export const PREFIX_UPLOAD = "/upload";
 export const PREFIX_UPLOAD_STREAM = "/upload-stream";
@@ -21,9 +25,10 @@ export const MAX_FILE_SIZE_KB = 10;
 export const MAX_FILES_TO_UPLOAD = 3;
 export const DEFAULT_ERROR_STATUS = 500;
 export const FULFILLED_BUT_NOT_SUCCESS_ERROR_STATUS = 999;
-export const UNKNOWN_ERROR_AFTER_FULFILLED_QUERY = "Unknown error after fulfilled query";
+export const UNKNOWN_ERROR_AFTER_FULFILLED_QUERY =
+  "Unknown error after fulfilled query";
 export const UNKNOWN_ERROR = "Unknown error";
-
+export const NO_REFRESH_TOKEN = "No refresh token";
 export const PROGRESS_STATUS_PROCESSING = "processing";
 export const PROGRESS_STATUS_COMPLETED = "completed";
 export const PROGRESS_STATUS_ERROR = "error";
