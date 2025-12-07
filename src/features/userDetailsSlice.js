@@ -23,8 +23,10 @@ const getInitialToken = () => {
 };
 
 const initialState = {
+  userId: null,
   userName: USER_NAME_UNDEFINED,
   userEmail: USER_EMAIL_UNDEFINED,
+  loadedFiles: [],
   token: getInitialToken(),
   refreshToken: localStorage.getItem(JWT_REFRESH_TOKEN),
   loading: false,
@@ -36,9 +38,12 @@ const userDetailsSlice = createSlice({
   initialState,
   reducers: {
     logoutUser(state) {
+      state.userId = null;
       state.userName = USER_NAME_UNDEFINED;
       state.userEmail = USER_EMAIL_UNDEFINED;
+      state.loadedFiles = [];
       state.token = null;
+      state.refreshToken = null;
       state.loading = false;
       state.error = null;
       localStorage.removeItem(JWT_TOKEN);
@@ -138,8 +143,10 @@ const userDetailsSlice = createSlice({
 
       const p = action.payload?.payload;
 
+      if (p?.id) state.userId = p.id;
       if (p?.username) state.userName = p.username;
       if (p?.email) state.userEmail = p.email;
+      if (p?.loadedFiles) state.loadedFiles = p.loadedFiles;
     });
 
     builder.addCase(fetchUserProfile.rejected, (state, action) => {
