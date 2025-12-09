@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { logoutUser } from "../features/userDetailsSlice";
+import { logoutUser, clearDeleteStatus } from "../features/userDetailsSlice";
+import fetchDeleteUploaded from "../features/fetch-async/fetchDeleteUploaded";
 import { TOKEN_UNDEFINED } from "../features/constants";
 
 function HomePage() {
@@ -13,6 +14,9 @@ function HomePage() {
   const userEmail = useSelector((state) => state.userDetails.userEmail);
   const loadedFiles = useSelector((state) => state.userDetails.loadedFiles);
   const loading = useSelector((state) => state.userDetails.loading);
+  const deleting = useSelector((state) => state.userDetails.deleting);
+  const deleteSuccess = useSelector((state) => state.userDetails.deleteSuccess);
+  const deletedCount = useSelector((state) => state.userDetails.deletedCount);
 
   const auth =
     typeof token === "string" &&
@@ -21,6 +25,16 @@ function HomePage() {
 
   const handleLogout = () => {
     dispatch(logoutUser());
+  };
+
+  const handleDeleteUploaded = () => {
+    if (window.confirm("Are you sure you want to delete all uploaded files?")) {
+      dispatch(fetchDeleteUploaded());
+    }
+  };
+
+  const handleClearDeleteStatus = () => {
+    dispatch(clearDeleteStatus());
   };
 
   return (
@@ -80,6 +94,23 @@ function HomePage() {
               )}
             </div>
 
+            {/* Delete Success Message */}
+            {deleteSuccess && (
+              <div className="bg-emerald-500/20 border border-emerald-500/50 rounded-2xl p-4 text-left">
+                <div className="flex items-center justify-between">
+                  <p className="text-emerald-400 text-sm">
+                    Successfully deleted {deletedCount} file(s)
+                  </p>
+                  <button
+                    onClick={handleClearDeleteStatus}
+                    className="text-emerald-400 hover:text-emerald-300 text-sm"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Loaded Files Section */}
             <div className="bg-slate-800/50 rounded-2xl p-4 text-left border border-slate-700/50">
               <h2 className="text-lg font-semibold mb-3 text-slate-200">
@@ -136,6 +167,13 @@ function HomePage() {
                 className="w-full py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-sm font-semibold transition-colors"
               >
                 Create new RAG query
+              </button>
+              <button
+                onClick={handleDeleteUploaded}
+                disabled={deleting || loadedFiles.length === 0}
+                className="w-full py-3 rounded-2xl bg-orange-500 hover:bg-orange-400 active:bg-orange-600 text-sm font-semibold shadow-lg shadow-orange-500/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {deleting ? "Deleting..." : "Delete uploaded"}
               </button>
               <button
                 onClick={handleLogout}

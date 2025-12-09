@@ -3,6 +3,7 @@ import fetchLoginUser from "./fetch-async/fetchLoginUser";
 import fetchRegisterUser from "./fetch-async/fetchRegisterUser";
 import fetchRefreshToken from "./fetch-async/fetchRefreshToken";
 import fetchUserProfile from "./fetch-async/fetchUserProfile";
+import fetchDeleteUploaded from "./fetch-async/fetchDeleteUploaded";
 
 import {
   USER_NAME_UNDEFINED,
@@ -27,9 +28,13 @@ const initialState = {
   userName: USER_NAME_UNDEFINED,
   userEmail: USER_EMAIL_UNDEFINED,
   loadedFiles: [],
+  maxFilesToLoad: 0,
   token: getInitialToken(),
   refreshToken: localStorage.getItem(JWT_REFRESH_TOKEN),
   loading: false,
+  deleting: false,
+  deleteSuccess: false,
+  deletedCount: 0,
   error: null,
 };
 
@@ -42,15 +47,23 @@ const userDetailsSlice = createSlice({
       state.userName = USER_NAME_UNDEFINED;
       state.userEmail = USER_EMAIL_UNDEFINED;
       state.loadedFiles = [];
+      state.maxFilesToLoad = 0;
       state.token = null;
       state.refreshToken = null;
       state.loading = false;
+      state.deleting = false;
+      state.deleteSuccess = false;
+      state.deletedCount = 0;
       state.error = null;
       localStorage.removeItem(JWT_TOKEN);
       localStorage.removeItem(JWT_REFRESH_TOKEN);
     },
     clearError(state) {
       state.error = null;
+    },
+    clearDeleteStatus(state) {
+      state.deleteSuccess = false;
+      state.deletedCount = 0;
     },
   },
   extraReducers: (builder) => {
@@ -147,14 +160,38 @@ const userDetailsSlice = createSlice({
       if (p?.username) state.userName = p.username;
       if (p?.email) state.userEmail = p.email;
       if (p?.loadedFiles) state.loadedFiles = p.loadedFiles;
+      if (p?.maxLoadedFiles != null) state.maxFilesToLoad = p.maxLoadedFiles;
     });
 
     builder.addCase(fetchUserProfile.rejected, (state, action) => {
       state.loading = false;
       state.error = action.payload ?? { status: 500, message: "Unknown error" };
     });
+
+    // Delete uploaded files
+    builder.addCase(fetchDeleteUploaded.pending, (state) => {
+      state.deleting = true;
+      state.deleteSuccess = false;
+      state.deletedCount = 0;
+      state.error = null;
+    });
+
+    builder.addCase(fetchDeleteUploaded.fulfilled, (state, action) => {
+      state.deleting = false;
+      state.deleteSuccess = true;
+      state.deletedCount = action.payload?.payload ?? 0;
+      state.loadedFiles = [];
+      state.error = null;
+    });
+
+    builder.addCase(fetchDeleteUploaded.rejected, (state, action) => {
+      state.deleting = false;
+      state.deleteSuccess = false;
+      state.error = action.payload ?? { status: 500, message: "Unknown error" };
+    });
   },
 });
 
-export const { logoutUser, clearError } = userDetailsSlice.actions;
+export const { logoutUser, clearError, clearDeleteStatus } =
+  userDetailsSlice.actions;
 export default userDetailsSlice.reducer;

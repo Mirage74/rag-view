@@ -10,6 +10,7 @@ import {
   PROGRESS_STATUS_ERROR,
   ERROR_NO_RESPONSE,
   UNKNOWN_ERROR,
+  MAX_FILES_TO_UPLOAD,
 } from "./constants";
 
 const initialState = {
@@ -20,6 +21,7 @@ const initialState = {
   },
   success: false,
   areFilesValid: true,
+  quotaError: null,
   uploadedFiles: [],
   progress: {
     percent: 0,
@@ -48,10 +50,17 @@ const uploadFilesSlice = createSlice({
     setAreFilesValid(state, action) {
       state.areFilesValid = action.payload;
     },
+    setQuotaError(state, action) {
+      state.quotaError = action.payload;
+    },
+    clearQuotaError(state) {
+      state.quotaError = null;
+    },
     uploadStarted(state, action) {
       state.uploading = true;
       state.error = { status: null, message: "" };
       state.success = false;
+      state.quotaError = null;
       state.progress = {
         percent: 0,
         processedFiles: 0,
@@ -88,6 +97,8 @@ const uploadFilesSlice = createSlice({
 export const {
   resetUploadState,
   setAreFilesValid,
+  setQuotaError,
+  clearQuotaError,
   uploadStarted,
   progressUpdated,
   uploadCompleted,
@@ -107,12 +118,104 @@ export const cancelUpload = () => (dispatch) => {
 };
 
 /**
+ * Validate files against quota limits
+ * Returns { valid: boolean, error: string | null }
+ */
+export const validateFilesQuota = (files) => (dispatch, getState) => {
+  const state = getState();
+  const loadedFiles = state.userDetails?.loadedFiles || [];
+  const maxFilesToLoad = state.userDetails?.maxFilesToLoad || 0;
+
+  const loadedCount = loadedFiles.length;
+  const remainingSlots = Math.max(0, maxFilesToLoad - loadedCount);
+  const filesCount = files.length;
+
+  // Check max files per upload
+  if (filesCount > MAX_FILES_TO_UPLOAD) {
+    const errorMsg = `You can upload maximum ${MAX_FILES_TO_UPLOAD} files at once`;
+    dispatch(setQuotaError(errorMsg));
+    dispatch(setAreFilesValid(false));
+    return { valid: false, error: errorMsg };
+  }
+
+  // Check remaining slots
+  if (filesCount > remainingSlots) {
+    const errorMsg =
+      remainingSlots === 0
+        ? `You have reached the maximum number of files (${maxFilesToLoad})`
+        : `You can only upload ${remainingSlots} more file(s). Already loaded: ${loadedCount}/${maxFilesToLoad}`;
+    dispatch(setQuotaError(errorMsg));
+    dispatch(setAreFilesValid(false));
+    return { valid: false, error: errorMsg };
+  }
+
+  dispatch(clearQuotaError());
+  dispatch(setAreFilesValid(true));
+  return { valid: true, error: null };
+};
+
+/**
+ * Check if user can upload files (has remaining slots)
+ */
+export const canUploadFiles = () => (dispatch, getState) => {
+  const state = getState();
+  const loadedFiles = state.userDetails?.loadedFiles || [];
+  const maxFilesToLoad = state.userDetails?.maxFilesToLoad || 0;
+
+  const remainingSlots = Math.max(0, maxFilesToLoad - loadedFiles.length);
+  return remainingSlots > 0;
+};
+
+/**
+ * Get remaining upload slots
+ */
+export const getRemainingSlots = () => (dispatch, getState) => {
+  const state = getState();
+  const loadedFiles = state.userDetails?.loadedFiles || [];
+  const maxFilesToLoad = state.userDetails?.maxFilesToLoad || 0;
+
+  return Math.max(0, maxFilesToLoad - loadedFiles.length);
+};
+
+/**
  * Thunk for uploading files with SSE progress streaming.
  */
 export const uploadFilesWithProgress =
   (files) => async (dispatch, getState) => {
     const filesArray = Array.from(files);
     const fileNames = filesArray.map((f) => f.name);
+
+    // Validate quota before upload
+    const state = getState();
+    const loadedFiles = state.userDetails?.loadedFiles || [];
+    const maxFilesToLoad = state.userDetails?.maxFilesToLoad || 0;
+    const loadedCount = loadedFiles.length;
+    const remainingSlots = Math.max(0, maxFilesToLoad - loadedCount);
+
+    // Check max files per upload
+    if (filesArray.length > MAX_FILES_TO_UPLOAD) {
+      dispatch(
+        uploadFailed({
+          status: 400,
+          message: `You can upload maximum ${MAX_FILES_TO_UPLOAD} files at once`,
+        })
+      );
+      return;
+    }
+
+    // Check remaining slots
+    if (filesArray.length > remainingSlots) {
+      dispatch(
+        uploadFailed({
+          status: 400,
+          message:
+            remainingSlots === 0
+              ? `You have reached the maximum number of files (${maxFilesToLoad})`
+              : `You can only upload ${remainingSlots} more file(s). Already loaded: ${loadedCount}/${maxFilesToLoad}`,
+        })
+      );
+      return;
+    }
 
     // Create new AbortController for this upload
     currentAbortController = new AbortController();
@@ -125,7 +228,6 @@ export const uploadFilesWithProgress =
       formData.append(FORM_DATA_FILES, file);
     });
 
-    const state = getState();
     const token = state.userDetails?.token;
 
     const headers = {};
@@ -140,7 +242,7 @@ export const uploadFilesWithProgress =
           method: METHOD_POST_QUERY,
           headers,
           body: formData,
-          signal, // Pass abort signal to fetch
+          signal,
         }
       );
 

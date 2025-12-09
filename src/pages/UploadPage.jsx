@@ -5,6 +5,8 @@ import {
   uploadFilesWithProgress,
   resetUploadState,
   setAreFilesValid,
+  setQuotaError,
+  clearQuotaError,
   cancelUpload,
 } from "../features/uploadFilesSlice";
 import {
@@ -19,8 +21,24 @@ import {
 export default function UploadPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { uploading, error, success, areFilesValid, progress, uploadedFiles } =
-    useSelector((state) => state.uploadFiles);
+  const {
+    uploading,
+    error,
+    success,
+    areFilesValid,
+    quotaError,
+    progress,
+    uploadedFiles,
+  } = useSelector((state) => state.uploadFiles);
+
+  const loadedFiles = useSelector((state) => state.userDetails.loadedFiles);
+  const maxFilesToLoad = useSelector(
+    (state) => state.userDetails.maxFilesToLoad
+  );
+
+  const loadedCount = loadedFiles?.length || 0;
+  const remainingSlots = Math.max(0, maxFilesToLoad - loadedCount);
+
   const [selectedFiles, setSelectedFiles] = useState([]);
   const fileInputRef = useRef(null);
 
@@ -29,6 +47,10 @@ export default function UploadPage() {
   }, [dispatch]);
 
   const handleUploadClick = () => {
+    if (remainingSlots === 0) {
+      dispatch(setQuotaError("You have reached the maximum number of files"));
+      return;
+    }
     if (fileInputRef.current) {
       fileInputRef.current.value = null;
       fileInputRef.current.click();
@@ -37,15 +59,44 @@ export default function UploadPage() {
 
   const handleFilesChange = (event) => {
     const files = Array.from(event.target.files || []);
+    dispatch(clearQuotaError());
 
-    const isCountCorrect = files.length <= MAX_FILES_TO_UPLOAD;
+    // Check max files per upload
+    if (files.length > MAX_FILES_TO_UPLOAD) {
+      dispatch(resetUploadState());
+      dispatch(setAreFilesValid(false));
+      dispatch(
+        setQuotaError(
+          `You can upload maximum ${MAX_FILES_TO_UPLOAD} files at once`
+        )
+      );
+      setSelectedFiles([]);
+      return;
+    }
+
+    // Check remaining slots
+    if (files.length > remainingSlots) {
+      dispatch(resetUploadState());
+      dispatch(setAreFilesValid(false));
+      dispatch(
+        setQuotaError(
+          `You can only upload ${remainingSlots} more file(s). Already loaded: ${loadedCount}/${maxFilesToLoad}`
+        )
+      );
+      setSelectedFiles([]);
+      return;
+    }
+
+    // Check file size
     const isSizeCorrect = files.every(
       (file) => file.size <= MAX_FILE_SIZE_KB * 1024
     );
-
-    if (!isCountCorrect || !isSizeCorrect) {
+    if (!isSizeCorrect) {
       dispatch(resetUploadState());
       dispatch(setAreFilesValid(false));
+      dispatch(
+        setQuotaError(`Each file must be no more than ${MAX_FILE_SIZE_KB} KB`)
+      );
       setSelectedFiles([]);
       return;
     }
@@ -61,6 +112,7 @@ export default function UploadPage() {
 
   const handleClear = () => {
     setSelectedFiles([]);
+    dispatch(clearQuotaError());
   };
 
   const handleCancel = () => {
@@ -127,7 +179,6 @@ export default function UploadPage() {
             <span>Uploading files...</span>
           </div>
 
-          {/* Progress bar */}
           <div style={styles.progressBarContainer}>
             <div
               style={{
@@ -137,7 +188,6 @@ export default function UploadPage() {
             />
           </div>
 
-          {/* Progress stats - only percentage during upload */}
           <div style={styles.progressStats}>
             <div style={styles.statItem}>
               <span style={styles.statValue}>{progress.percent}%</span>
@@ -145,7 +195,6 @@ export default function UploadPage() {
             </div>
           </div>
 
-          {/* Current file */}
           {progress.currentFile && (
             <div style={styles.currentFile}>
               <span>{getStatusIcon(progress.status)}</span>
@@ -156,7 +205,6 @@ export default function UploadPage() {
             </div>
           )}
 
-          {/* Cancel button */}
           <div style={styles.cancelButtonContainer}>
             <button style={styles.cancelButton} onClick={handleCancel}>
               Cancel Upload
@@ -233,14 +281,70 @@ export default function UploadPage() {
         to {MAX_FILES_TO_UPLOAD} files at once.
       </p>
 
-      {!areFilesValid && (
+      {/* File quota info */}
+      <div style={styles.quotaContainer}>
+        <div style={styles.quotaRow}>
+          <span style={styles.quotaLabel}>Files loaded:</span>
+          <span style={styles.quotaValue}>
+            {loadedCount} / {maxFilesToLoad}
+          </span>
+        </div>
+        <div style={styles.quotaRow}>
+          <span style={styles.quotaLabel}>Remaining slots:</span>
+          <span
+            style={{
+              ...styles.quotaValue,
+              color: remainingSlots > 0 ? "#38a169" : "#e53e3e",
+            }}
+          >
+            {remainingSlots}
+          </span>
+        </div>
+        <div style={styles.quotaProgressContainer}>
+          <div
+            style={{
+              ...styles.quotaProgressFill,
+              width: `${
+                maxFilesToLoad > 0 ? (loadedCount / maxFilesToLoad) * 100 : 0
+              }%`,
+            }}
+          />
+        </div>
+      </div>
+
+      {!areFilesValid && !quotaError && (
         <div style={styles.warningBox}>
           <span>⚠️</span>
           <span>File requirements not met. Please adjust your selection.</span>
         </div>
       )}
 
-      <button style={styles.uploadButton} onClick={handleUploadClick}>
+      {quotaError && (
+        <div style={styles.warningBox}>
+          <span>⚠️</span>
+          <span>{quotaError}</span>
+        </div>
+      )}
+
+      {remainingSlots === 0 && !quotaError && (
+        <div style={styles.errorBox}>
+          <span style={styles.errorIcon}>🚫</span>
+          <div>
+            <div style={styles.errorMessage}>
+              You have reached the maximum number of files
+            </div>
+          </div>
+        </div>
+      )}
+
+      <button
+        style={{
+          ...styles.uploadButton,
+          ...(remainingSlots === 0 && styles.buttonDisabled),
+        }}
+        onClick={handleUploadClick}
+        disabled={remainingSlots === 0}
+      >
         <span style={styles.uploadIcon}>📁</span>
         Select files
       </button>
@@ -316,6 +420,40 @@ const styles = {
     color: "#666",
     marginBottom: "1.5rem",
     lineHeight: 1.5,
+  },
+  quotaContainer: {
+    backgroundColor: "#f8f9fa",
+    borderRadius: "8px",
+    padding: "1rem",
+    marginBottom: "1rem",
+    border: "1px solid #e0e0e0",
+  },
+  quotaRow: {
+    display: "flex",
+    justifyContent: "space-between",
+    marginBottom: "0.5rem",
+  },
+  quotaLabel: {
+    color: "#666",
+    fontSize: "0.9rem",
+  },
+  quotaValue: {
+    fontWeight: 500,
+    color: "#1a1a2e",
+  },
+  quotaProgressContainer: {
+    width: "100%",
+    height: "6px",
+    backgroundColor: "#e0e0e0",
+    borderRadius: "3px",
+    overflow: "hidden",
+    marginTop: "0.5rem",
+  },
+  quotaProgressFill: {
+    height: "100%",
+    backgroundColor: "#667eea",
+    borderRadius: "3px",
+    transition: "width 0.3s ease",
   },
   progressContainer: {
     backgroundColor: "#f8f9fa",
@@ -412,6 +550,7 @@ const styles = {
     border: "1px solid #feb2b2",
     borderRadius: "8px",
     marginTop: "1rem",
+    marginBottom: "1rem",
   },
   errorIcon: {
     fontSize: "2rem",

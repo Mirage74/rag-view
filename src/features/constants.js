@@ -1,6 +1,7 @@
 export const BASE_URL = "http://localhost:8080";
 export const METHOD_POST_QUERY = "POST";
 export const METHOD_GET_QUERY = "GET";
+export const METHOD_DELETE_QUERY = "DELETE";
 export const HEADER_CONTENT_TYPE = "Content-Type";
 export const JWT_TOKEN = "jwt";
 export const JWT_REFRESH_TOKEN = "jwt-refresh";
