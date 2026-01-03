@@ -8,6 +8,7 @@ export const JWT_REFRESH_TOKEN = "jwt-refresh";
 export const APPLICATION_JSON = "application/json";
 export const USER_NAME_UNDEFINED = "userNameUndefined";
 export const USER_EMAIL_UNDEFINED = "userEmailUndefined";
+export const TOKEN_EXPIRED = "Token expired.";
 export const ERROR_RESPONSE_NOT_OK = "Response not ok";
 export const ERROR_NO_RESPONSE = "No response from server";
 export const PREFIX_AUTH = "/auth";

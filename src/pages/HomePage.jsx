@@ -38,72 +38,77 @@ function HomePage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-[70vh]">
-      <div className="w-full max-w-lg bg-slate-900/80 rounded-3xl border border-slate-700/70 shadow-2xl p-8 text-center">
-        <h1 className="text-2xl font-semibold mb-2">RAG Viewer</h1>
-        <p className="text-sm text-slate-400 mb-8">
-          Choose an option to start working with your text files and RAG
-          queries.
-        </p>
+    <div className="flex items-center justify-center h-screen bg-slate-950 p-4 overflow-hidden">
+      <div className="w-full max-w-md bg-slate-900/90 rounded-2xl border border-slate-700/60 shadow-xl p-6">
+        {/* Header */}
+        <div className="text-center mb-4">
+          <h1 className="text-xl font-semibold text-white">RAG Viewer</h1>
+          <p className="text-xs text-slate-400 mt-1">
+            Choose an option to start working with your text files and RAG
+            queries.
+          </p>
+        </div>
 
         {!auth ? (
-          <div className="space-y-4">
+          <div className="space-y-3">
             <button
               onClick={() => navigate("/register")}
-              className="w-full py-3 rounded-2xl bg-indigo-500 hover:bg-indigo-400 active:bg-indigo-600 text-sm font-semibold shadow-lg shadow-indigo-500/30 transition-colors"
+              className="w-full py-2.5 rounded-xl bg-indigo-500 hover:bg-indigo-400 active:bg-indigo-600 text-sm font-medium text-white shadow-md shadow-indigo-500/25 transition-colors"
             >
               Register
             </button>
             <button
               onClick={() => navigate("/login")}
-              className="w-full py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-sm font-semibold transition-colors"
+              className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-sm font-medium text-white transition-colors"
             >
               Login
             </button>
             <button
               onClick={() => navigate("/guest-login")}
-              className="w-full py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-sm font-semibold shadow-lg shadow-emerald-500/30 transition-colors"
+              className="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-sm font-medium text-white shadow-md shadow-emerald-500/25 transition-colors"
             >
               Login as guest
             </button>
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-4">
             {/* User Info Section */}
-            <div className="bg-slate-800/50 rounded-2xl p-4 text-left border border-slate-700/50">
-              <h2 className="text-lg font-semibold mb-3 text-slate-200">
+            <div className="bg-slate-800/60 rounded-xl p-3 border border-slate-700/40">
+              <h2 className="text-sm font-semibold text-slate-200 mb-2">
                 User Profile
               </h2>
               {loading ? (
-                <p className="text-slate-400 text-sm">Loading...</p>
+                <p className="text-slate-400 text-xs">Loading...</p>
               ) : (
-                <div className="space-y-2 text-sm">
-                  <p>
-                    <span className="text-slate-400">ID:</span>{" "}
+                <div className="grid grid-cols-3 gap-2 text-xs">
+                  <div>
+                    <span className="text-slate-500 block">ID</span>
                     <span className="text-slate-200">{userId ?? "—"}</span>
-                  </p>
-                  <p>
-                    <span className="text-slate-400">Username:</span>{" "}
+                  </div>
+                  <div>
+                    <span className="text-slate-500 block">Username</span>
                     <span className="text-slate-200">{userName}</span>
-                  </p>
-                  <p>
-                    <span className="text-slate-400">Email:</span>{" "}
-                    <span className="text-slate-200">{userEmail}</span>
-                  </p>
+                  </div>
+                  <div>
+                    <span className="text-slate-500 block">Email</span>
+                    <span className="text-slate-200 truncate block">
+                      {userEmail}
+                    </span>
+                  </div>
                 </div>
               )}
             </div>
 
             {/* Delete Success Message */}
             {deleteSuccess && (
-              <div className="bg-emerald-500/20 border border-emerald-500/50 rounded-2xl p-4 text-left">
+              <div className="bg-emerald-500/15 border border-emerald-500/40 rounded-xl p-2.5">
                 <div className="flex items-center justify-between">
-                  <p className="text-emerald-400 text-sm">
+                  <p className="text-emerald-400 text-xs">
                     Successfully deleted {deletedCount} file(s)
                   </p>
                   <button
                     onClick={handleClearDeleteStatus}
-                    className="text-emerald-400 hover:text-emerald-300 text-sm"
+                    className="text-emerald-400 hover:text-emerald-300 text-xs ml-2"
                   >
                     ✕
                   </button>
@@ -112,25 +117,25 @@ function HomePage() {
             )}
 
             {/* Loaded Files Section */}
-            <div className="bg-slate-800/50 rounded-2xl p-4 text-left border border-slate-700/50">
-              <h2 className="text-lg font-semibold mb-3 text-slate-200">
+            <div className="bg-slate-800/60 rounded-xl p-3 border border-slate-700/40">
+              <h2 className="text-sm font-semibold text-slate-200 mb-2">
                 Loaded Documents ({loadedFiles.length})
               </h2>
               {loading ? (
-                <p className="text-slate-400 text-sm">Loading...</p>
+                <p className="text-slate-400 text-xs">Loading...</p>
               ) : loadedFiles.length === 0 ? (
-                <p className="text-slate-400 text-sm">
+                <p className="text-slate-400 text-xs">
                   No documents uploaded yet
                 </p>
               ) : (
-                <ul className="space-y-2 max-h-40 overflow-y-auto">
+                <ul className="space-y-1.5 max-h-24 overflow-y-auto">
                   {loadedFiles.map((file) => (
                     <li
                       key={file.id}
-                      className="flex items-center gap-2 text-sm bg-slate-700/30 rounded-lg px-3 py-2"
+                      className="flex items-center gap-2 text-xs bg-slate-700/40 rounded-lg px-2.5 py-1.5"
                     >
                       <svg
-                        className="w-4 h-4 text-indigo-400 flex-shrink-0"
+                        className="w-3.5 h-3.5 text-indigo-400 flex-shrink-0"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -142,10 +147,10 @@ function HomePage() {
                           d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                         />
                       </svg>
-                      <span className="text-slate-200 truncate">
+                      <span className="text-slate-200 truncate flex-1">
                         {file.fileName}
                       </span>
-                      <span className="text-slate-500 text-xs ml-auto">
+                      <span className="text-slate-500 text-[10px]">
                         #{file.id}
                       </span>
                     </li>
@@ -154,30 +159,30 @@ function HomePage() {
               )}
             </div>
 
-            {/* Action Buttons */}
-            <div className="space-y-4">
+            {/* Action Buttons - 2x2 Grid */}
+            <div className="grid grid-cols-2 gap-2">
               <button
                 onClick={() => navigate("/upload")}
-                className="w-full py-3 rounded-2xl bg-indigo-500 hover:bg-indigo-400 active:bg-indigo-600 text-sm font-semibold shadow-lg shadow-indigo-500/30 transition-colors"
+                className="py-2.5 rounded-xl bg-indigo-500 hover:bg-indigo-400 active:bg-indigo-600 text-xs font-medium text-white shadow-md shadow-indigo-500/25 transition-colors"
               >
-                Upload TXT file
+                Upload TXT
               </button>
               <button
                 onClick={() => navigate("/rag")}
-                className="w-full py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-sm font-semibold transition-colors"
+                className="py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 active:bg-slate-800 text-xs font-medium text-white transition-colors"
               >
-                Create new RAG query
+                New RAG Query
               </button>
               <button
                 onClick={handleDeleteUploaded}
                 disabled={deleting || loadedFiles.length === 0}
-                className="w-full py-3 rounded-2xl bg-orange-500 hover:bg-orange-400 active:bg-orange-600 text-sm font-semibold shadow-lg shadow-orange-500/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="py-2.5 rounded-xl bg-orange-500 hover:bg-orange-400 active:bg-orange-600 text-xs font-medium text-white shadow-md shadow-orange-500/25 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                {deleting ? "Deleting..." : "Delete uploaded"}
+                {deleting ? "Deleting..." : "Delete Files"}
               </button>
               <button
                 onClick={handleLogout}
-                className="w-full py-3 rounded-2xl bg-red-500 hover:bg-red-400 active:bg-red-600 text-sm font-semibold shadow-lg shadow-red-500/30 transition-colors"
+                className="py-2.5 rounded-xl bg-red-500 hover:bg-red-400 active:bg-red-600 text-xs font-medium text-white shadow-md shadow-red-500/25 transition-colors"
               >
                 Logout
               </button>

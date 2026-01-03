@@ -26,7 +26,7 @@ function RegisterPage() {
       userName !== USER_NAME_UNDEFINED &&
       userEmail !== USER_EMAIL_UNDEFINED
     ) {
-      navigate("/rag");
+      navigate("/");
     }
   }, [loading, userName, userEmail, navigate]);
 

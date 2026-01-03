@@ -1,5 +1,7 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { fetchWithAuth } from "./fetchWithAuth";
+import { logoutUser } from "../userDetailsSlice";
+import { TOKEN_EXPIRED } from "../constants";
 import {
   BASE_URL,
   PREFIX_USERS,
@@ -17,15 +19,19 @@ const fetchUserProfile = createAsyncThunk(
       thunkAPI
     );
 
+    const text = await res.text().catch(() => "");
     if (!res.ok) {
-      const text = await res.text().catch(() => "");
+      if (text === TOKEN_EXPIRED) {
+        thunkAPI.dispatch(logoutUser());
+        return;
+      }
       return thunkAPI.rejectWithValue({
         status: res.status,
         message: text || ERROR_RESPONSE_NOT_OK,
       });
     }
 
-    const data = await res.json();
+    const data = JSON.parse(text);
     return data;
   }
 );

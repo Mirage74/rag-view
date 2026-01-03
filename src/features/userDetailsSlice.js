@@ -65,6 +65,9 @@ const userDetailsSlice = createSlice({
       state.deleteSuccess = false;
       state.deletedCount = 0;
     },
+    addLoadedFiles(state, action) {
+      state.loadedFiles = [...state.loadedFiles, ...action.payload];
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(fetchRegisterUser.pending, (state) => {
@@ -192,6 +195,6 @@ const userDetailsSlice = createSlice({
   },
 });
 
-export const { logoutUser, clearError, clearDeleteStatus } =
+export const { logoutUser, clearError, clearDeleteStatus, addLoadedFiles } =
   userDetailsSlice.actions;
 export default userDetailsSlice.reducer;

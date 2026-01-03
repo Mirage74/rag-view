@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { addLoadedFiles } from "./userDetailsSlice";
 import {
   BASE_URL,
   METHOD_POST_QUERY,
@@ -288,6 +289,7 @@ export const uploadFilesWithProgress =
 
                 if (progressData.status === PROGRESS_STATUS_COMPLETED) {
                   dispatch(uploadCompleted({ fileNames }));
+                  dispatch(addLoadedFiles(fileNames));
                 } else if (progressData.status === PROGRESS_STATUS_ERROR) {
                   dispatch(
                     uploadFailed({
@@ -308,6 +310,7 @@ export const uploadFilesWithProgress =
       const currentState = getState();
       if (currentState.uploadFiles.uploading) {
         dispatch(uploadCompleted({ fileNames }));
+        dispatch(addLoadedFiles(fileNames));
       }
     } catch (err) {
       // Don't dispatch error if it was an intentional abort
