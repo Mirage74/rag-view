@@ -1,6 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { logoutUser, clearDeleteStatus } from "../features/userDetailsSlice";
+import {
+  logoutUser,
+  clearDeleteStatus,
+} from "../features/slices/details-slice";
 import fetchDeleteUploaded from "../features/fetch-async/fetchDeleteUploaded";
 import { TOKEN_UNDEFINED } from "../features/constants";
 

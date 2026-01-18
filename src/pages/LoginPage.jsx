@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { clearError } from "../features/userDetailsSlice";
+import { clearError } from "../features/slices/details-slice";
 import fetchLoginUser from "../features/fetch-async/fetchLoginUser";
 
 function LoginPage() {

@@ -1,5 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { addLoadedFiles } from "./userDetailsSlice";
+//import { addLoadedFiles } from "./slices/details-slice";
+import fetchUserProfile from "./fetch-async/fetchUserProfile";
 import {
   BASE_URL,
   METHOD_POST_QUERY,
@@ -289,7 +290,8 @@ export const uploadFilesWithProgress =
 
                 if (progressData.status === PROGRESS_STATUS_COMPLETED) {
                   dispatch(uploadCompleted({ fileNames }));
-                  dispatch(addLoadedFiles(fileNames));
+                  dispatch(fetchUserProfile());
+                  //dispatch(addLoadedFiles(fileNames));
                 } else if (progressData.status === PROGRESS_STATUS_ERROR) {
                   dispatch(
                     uploadFailed({

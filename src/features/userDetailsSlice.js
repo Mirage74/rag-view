@@ -195,6 +195,5 @@ const userDetailsSlice = createSlice({
   },
 });
 
-export const { logoutUser, clearError, clearDeleteStatus, addLoadedFiles } =
-  userDetailsSlice.actions;
-export default userDetailsSlice.reducer;
+//export const { logoutUser, clearError, clearDeleteStatus, addLoadedFiles } =  userDetailsSlice.actions;
+//export default userDetailsSlice.reducer;
