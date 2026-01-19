@@ -1,9 +1,4 @@
-import {
-  USER_NAME_UNDEFINED,
-  USER_EMAIL_UNDEFINED,
-  JWT_TOKEN,
-  JWT_REFRESH_TOKEN,
-} from "../../constants";
+import { JWT_TOKEN, JWT_REFRESH_TOKEN } from "../../constants";
 
 import { initialState } from "./initialState";
 

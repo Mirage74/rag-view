@@ -1,13 +1,11 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { fetchWithAuth } from "./fetchWithAuth";
 import { logoutUser } from "../slices/details-slice";
-import { TOKEN_EXPIRED } from "../constants";
 import {
   BASE_URL,
   PREFIX_USERS,
   PREFIX_USERINFO,
   METHOD_GET_QUERY,
-  ERROR_RESPONSE_NOT_OK,
 } from "../constants";
 
 const fetchUserProfile = createAsyncThunk(

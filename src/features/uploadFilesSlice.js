@@ -108,9 +108,6 @@ export const {
   uploadCancelled,
 } = uploadFilesSlice.actions;
 
-/**
- * Cancel the current upload
- */
 export const cancelUpload = () => (dispatch) => {
   if (currentAbortController) {
     currentAbortController.abort();
@@ -333,4 +330,4 @@ export const uploadFilesWithProgress =
     }
   };
 
-export default uploadFilesSlice.reducer;
+//export default uploadFilesSlice.reducer;

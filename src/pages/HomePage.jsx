@@ -138,7 +138,7 @@ function HomePage() {
                       className="flex items-center gap-2 text-xs bg-slate-700/40 rounded-lg px-2.5 py-1.5"
                     >
                       <svg
-                        className="w-3.5 h-3.5 text-indigo-400 flex-shrink-0"
+                        className="w-3.5 h-3.5 text-indigo-400 shrink-0"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"

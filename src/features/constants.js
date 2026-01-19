@@ -13,6 +13,8 @@ export const ERROR_RESPONSE_NOT_OK = "Response not ok";
 export const ERROR_NO_RESPONSE = "No response from server";
 export const PREFIX_AUTH = "/auth";
 export const PREFIX_USERS = "/users";
+export const PREFIX_CHAT = "/chat";
+export const PREFIX_CREATE_NEW_CHAT = "/new";
 export const PREFIX_USERINFO = "/userinfo";
 export const PREFIX_REGISTER = "/register";
 export const PREFIX_LOGIN = "/login";
@@ -35,3 +37,15 @@ export const PROGRESS_STATUS_PROCESSING = "processing";
 export const PROGRESS_STATUS_COMPLETED = "completed";
 export const PROGRESS_STATUS_ERROR = "error";
 export const PROGRESS_STATUS_SKIPPED = "skipped";
+export const IS_SEARCH_RESULT_ONLY_WITH_CONTEXT_DEFAULT = true;
+export const TOP_K_MIN_VALUE = 1;
+export const TOP_K_DEFAULT_VALUE = 2;
+export const TOP_K_MAX_VALUE = 5;
+export const TOP_P_FAST_VALUE = 0.5;
+export const TOP_P_DEFAULT_VALUE = 0.6;
+export const TOP_P_SLOW_VALUE = 0.9;
+export const NO_ACTIVE_CHAT_ID = 0;
+export const MESSAGE_ROLE = {
+  USER: "user",
+  ASSISTANT: "assistant",
+};
