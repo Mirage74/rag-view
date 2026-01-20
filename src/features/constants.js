@@ -32,6 +32,8 @@ export const FULFILLED_BUT_NOT_SUCCESS_ERROR_STATUS = 999;
 export const UNKNOWN_ERROR_AFTER_FULFILLED_QUERY =
   "Unknown error after fulfilled query";
 export const UNKNOWN_ERROR = "Unknown error";
+export const STATUS_UNAUTHORIZED = "unauthorized";
+export const HTTP_STATUS_UNAUTHORIZED_CODE = 401;
 export const NO_REFRESH_TOKEN = "No refresh token";
 export const PROGRESS_STATUS_PROCESSING = "processing";
 export const PROGRESS_STATUS_COMPLETED = "completed";

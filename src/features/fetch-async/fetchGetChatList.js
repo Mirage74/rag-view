@@ -3,24 +3,21 @@ import { fetchWithAuth } from "./fetchWithAuth";
 import {
   BASE_URL,
   PREFIX_CHAT,
-  PREFIX_CREATE_NEW_CHAT,
-  METHOD_POST_QUERY,
+  METHOD_GET_QUERY,
   STATUS_UNAUTHORIZED,
   UNKNOWN_ERROR,
   HTTP_STATUS_UNAUTHORIZED_CODE,
 } from "../constants";
 
-const fetchCreateNewChat = createAsyncThunk(
-  "chat/fetchCreateNewChat",
-  async (title, thunkAPI) => {
+const fetchGetChatList = createAsyncThunk(
+  "chat/fetchGetChatList",
+  async (_, thunkAPI) => {
     const { rejectWithValue } = thunkAPI;
 
     try {
       const res = await fetchWithAuth(
-        `${BASE_URL}${PREFIX_CHAT}${PREFIX_CREATE_NEW_CHAT}?title=${encodeURIComponent(
-          title,
-        )}`,
-        { method: METHOD_POST_QUERY },
+        `${BASE_URL}${PREFIX_CHAT}`,
+        { method: METHOD_GET_QUERY },
         thunkAPI,
       );
 
@@ -40,4 +37,4 @@ const fetchCreateNewChat = createAsyncThunk(
   },
 );
 
-export default fetchCreateNewChat;
+export default fetchGetChatList;

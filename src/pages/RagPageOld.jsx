@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import fetchGetChatList from "../features/fetch-async/fetchGetChatList";
 import {
   switchSearchMode,
   setTopK,
@@ -15,11 +16,35 @@ import {
   TOP_P_SLOW_VALUE,
 } from "../features/constants";
 
+// Helper function to format date
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 0) return "Today";
+  if (diffDays === 1) return "Yesterday";
+
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+};
+
 const RagPage = () => {
   const dispatch = useDispatch();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isCreatingChat, setIsCreatingChat] = useState(false);
   const [newChatTitle, setNewChatTitle] = useState("");
+  const chatList = useSelector((state) => state.chats.chatList);
+
+  // Sort chats: newest first (by createdAt descending)
+  const sortedChats = [...chatList].sort(
+    (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+  );
+
+  useEffect(() => {
+    if (chatList.length === 0) {
+      dispatch(fetchGetChatList());
+    }
+  }, [dispatch, chatList.length]);
 
   // User details selectors
   const { userName, userEmail, loadedFiles, loading } = useSelector(
@@ -30,13 +55,6 @@ const RagPage = () => {
   const { isUseOnlyContextSearch, topK, topP } = useSelector(
     (state) => state.ragConfig,
   );
-
-  // Mock chats data (replace with real data)
-  const chats = [
-    { id: 1, title: "Chat about RAG", date: "Today" },
-    { id: 2, title: "Document analysis", date: "Yesterday" },
-    { id: 3, title: "Query optimization", date: "Jan 15" },
-  ];
 
   const handleSearchModeChange = () => {
     dispatch(switchSearchMode());
@@ -148,14 +166,14 @@ const RagPage = () => {
 
           {/* Chat List */}
           <div className="space-y-1">
-            {chats.map((chat) => (
+            {sortedChats.map((chat) => (
               <button
                 key={chat.id}
                 className="w-full text-left px-3 py-2.5 rounded-lg text-slate-300 hover:bg-slate-800/60 hover:text-white transition-colors group"
               >
                 <p className="text-sm truncate">{chat.title}</p>
                 <p className="text-xs text-slate-500 group-hover:text-slate-400">
-                  {chat.date}
+                  {formatDate(chat.createdAt)}
                 </p>
               </button>
             ))}

@@ -4,7 +4,7 @@ import { JWT_TOKEN } from "../constants";
 export const fetchWithAuth = async (
   url,
   options = {},
-  { dispatch, getState }
+  { dispatch, getState },
 ) => {
   const state = getState();
   const token = state.userDetails?.token || localStorage.getItem(JWT_TOKEN);
