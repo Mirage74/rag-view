@@ -9,6 +9,7 @@ const NewChatButton = () => {
 
   const handleCreate = () => {
     if (title.trim()) {
+      // Create new chat with title only (no initial message)
       dispatch(fetchCreateNewChat(title.trim()));
       setIsCreating(false);
       setTitle("");

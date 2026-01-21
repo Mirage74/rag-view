@@ -8,7 +8,7 @@ import {
   setQuotaError,
   clearQuotaError,
   cancelUpload,
-} from "../../features/uploadFilesSlice";
+} from "../../features/slices/upload-slice";
 import {
   MAX_FILE_SIZE_KB,
   MAX_FILES_TO_UPLOAD,

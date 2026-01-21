@@ -1,6 +1,22 @@
+import { useSelector, useDispatch } from "react-redux";
+import { setActiveChat } from "../../../features/slices/chat-slice";
 import { formatDate } from "../utils/formatDate";
 
 const ChatList = ({ chats }) => {
+  const dispatch = useDispatch();
+  const activeChatId = useSelector((state) => state.chats.activeChatId);
+
+  const handleChatClick = (chat) => {
+    dispatch(setActiveChat(chat));
+  };
+
+  // Sort chats: active chat first, then by date
+  const sortedChats = [...chats].sort((a, b) => {
+    if (a.id === activeChatId) return -1;
+    if (b.id === activeChatId) return 1;
+    return new Date(b.createdAt) - new Date(a.createdAt);
+  });
+
   return (
     <div className="flex-1 overflow-y-auto px-3">
       <div className="flex items-center gap-2 px-2 py-2 text-slate-400">
@@ -21,17 +37,32 @@ const ChatList = ({ chats }) => {
       </div>
 
       <div className="space-y-1">
-        {chats.map((chat) => (
-          <button
-            key={chat.id}
-            className="w-full text-left px-3 py-2.5 rounded-lg text-slate-300 hover:bg-slate-800/60 hover:text-white transition-colors group"
-          >
-            <p className="text-sm truncate">{chat.title}</p>
-            <p className="text-xs text-slate-500 group-hover:text-slate-400">
-              {formatDate(chat.createdAt)}
-            </p>
-          </button>
-        ))}
+        {sortedChats.map((chat) => {
+          const isActive = chat.id === activeChatId;
+
+          return (
+            <button
+              key={chat.id}
+              onClick={() => handleChatClick(chat)}
+              className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors group ${
+                isActive
+                  ? "bg-indigo-600/30 text-indigo-200 border border-indigo-500/40"
+                  : "text-slate-300 hover:bg-slate-800/60 hover:text-white"
+              }`}
+            >
+              <p className="text-sm truncate">{chat.title}</p>
+              <p
+                className={`text-xs ${
+                  isActive
+                    ? "text-indigo-400/70"
+                    : "text-slate-500 group-hover:text-slate-400"
+                }`}
+              >
+                {formatDate(chat.createdAt)}
+              </p>
+            </button>
+          );
+        })}
       </div>
     </div>
   );

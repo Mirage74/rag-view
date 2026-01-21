@@ -47,6 +47,7 @@ export const TOP_P_FAST_VALUE = 0.5;
 export const TOP_P_DEFAULT_VALUE = 0.6;
 export const TOP_P_SLOW_VALUE = 0.9;
 export const NO_ACTIVE_CHAT_ID = 0;
+export const MAX_TITLE_LENGTH = 30;
 export const MESSAGE_ROLE = {
   USER: "user",
   ASSISTANT: "assistant",
