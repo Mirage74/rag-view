@@ -14,6 +14,7 @@ export const ERROR_NO_RESPONSE = "No response from server";
 export const PREFIX_AUTH = "/auth";
 export const PREFIX_USERS = "/users";
 export const PREFIX_CHAT = "/chat";
+export const PREFIX_ENTRY = "/entry";
 export const PREFIX_CREATE_NEW_CHAT = "/new";
 export const PREFIX_USERINFO = "/userinfo";
 export const PREFIX_REGISTER = "/register";

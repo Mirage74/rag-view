@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import fetchCreateNewChat from "../../../features/fetch-async/fetchCreateNewChat";
+import fetchAddNewUserEntry from "../../../features/fetch-async/fetchAddNewUserEntry";
 import { generateTitleFromMessage } from "../utils/titleUtils";
 
 const ChatArea = () => {
@@ -19,8 +20,9 @@ const ChatArea = () => {
       dispatch(fetchCreateNewChat(title, trimmedInput));
     } else {
       // Active chat exists - send message to it
-      // TODO: dispatch send message action
-      console.log("Send message to chat:", activeChatId, trimmedInput);
+      dispatch(
+        fetchAddNewUserEntry({ chatId: activeChatId, content: trimmedInput }),
+      );
     }
 
     setInputValue("");

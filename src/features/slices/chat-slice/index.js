@@ -4,6 +4,8 @@ import { reducers } from "./reducers";
 import { initialState } from "./initialState";
 import { buildNewChatExtraReducers } from "./newChatExtraReducers";
 import { buildChatListExtraReducers } from "./getChatListExtraReducers";
+import { buildDeleteChatExtraReducers } from "./deleteChatExtraReducers";
+import { buildNewEntryExtraReducers } from "./newEntryExtraReducers";
 
 const chatSlice = createSlice({
   name: "chats",
@@ -12,10 +14,11 @@ const chatSlice = createSlice({
   extraReducers: (builder) => {
     buildNewChatExtraReducers(builder);
     buildChatListExtraReducers(builder);
+    buildDeleteChatExtraReducers(builder);
+    buildNewEntryExtraReducers(builder);
   },
 });
 
-// Export the action
 export const { setActiveChat } = chatSlice.actions;
 
 export default chatSlice.reducer;
