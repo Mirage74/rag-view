@@ -1,9 +1,12 @@
 import { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import fetchCreateNewChat from "../../../features/fetch-async/fetchCreateNewChat";
+import { NO_ACTIVE_CHAT_ID } from "../../../features/constants";
 
 const NewChatButton = () => {
   const dispatch = useDispatch();
+  const activeChatId = useSelector((state) => state.chats.activeChatId);
+  const isDisabled = activeChatId === NO_ACTIVE_CHAT_ID;
   const [isCreating, setIsCreating] = useState(false);
   const [title, setTitle] = useState("");
 
@@ -58,7 +61,12 @@ const NewChatButton = () => {
     <div className="p-3">
       <button
         onClick={() => setIsCreating(true)}
-        className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-medium transition-colors"
+        disabled={isDisabled}
+        className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${
+          isDisabled
+            ? "bg-slate-700/50 text-slate-500 cursor-not-allowed"
+            : "bg-indigo-600 hover:bg-indigo-500 text-white"
+        }`}
       >
         <svg
           className="w-5 h-5"
