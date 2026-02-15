@@ -2,26 +2,22 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import { fetchWithAuth } from "./fetchWithAuth";
 import {
   BASE_URL,
-  PREFIX_ENTRY,
-  METHOD_POST_QUERY,
+  PREFIX_CHAT,
+  METHOD_GET_QUERY,
   STATUS_UNAUTHORIZED,
   UNKNOWN_ERROR,
   HTTP_STATUS_UNAUTHORIZED_CODE,
 } from "../constants";
 
-const fetchAddNewUserEntry = createAsyncThunk(
-  "chat/fetchAddNewUserEntry",
-  async ({ chatId, content, onlyContext, topK, topP }, thunkAPI) => {
+const fetchGetChat = createAsyncThunk(
+  "chat/fetchGetChat",
+  async (chatId, thunkAPI) => {
     const { rejectWithValue } = thunkAPI;
 
     try {
       const res = await fetchWithAuth(
-        `${BASE_URL}${PREFIX_ENTRY}/${chatId}`,
-        {
-          method: METHOD_POST_QUERY,
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ content, onlyContext, topK, topP }),
-        },
+        `${BASE_URL}${PREFIX_CHAT}/${chatId}`,
+        { method: METHOD_GET_QUERY },
         thunkAPI,
       );
 
@@ -41,4 +37,4 @@ const fetchAddNewUserEntry = createAsyncThunk(
   },
 );
 
-export default fetchAddNewUserEntry;
+export default fetchGetChat;

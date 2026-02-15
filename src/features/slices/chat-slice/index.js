@@ -6,6 +6,7 @@ import { buildNewChatExtraReducers } from "./newChatExtraReducers";
 import { buildChatListExtraReducers } from "./getChatListExtraReducers";
 import { buildDeleteChatExtraReducers } from "./deleteChatExtraReducers";
 import { buildNewEntryExtraReducers } from "./newEntryExtraReducers";
+import { buildGetChatExtraReducers } from "./getChatExtraReducers";
 
 const chatSlice = createSlice({
   name: "chats",
@@ -16,6 +17,7 @@ const chatSlice = createSlice({
     buildChatListExtraReducers(builder);
     buildDeleteChatExtraReducers(builder);
     buildNewEntryExtraReducers(builder);
+    buildGetChatExtraReducers(builder);
   },
 });
 

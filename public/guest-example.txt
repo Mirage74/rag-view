@@ -1,0 +1,30 @@
+Project Aurora - Internal Technical Documentation
+
+Project Aurora is an internal microservices platform developed by NovaTech Solutions
+in Q3 2024. The platform consists of five core services: Gateway Service (port 8080),
+User Management Service (port 8081), Notification Service (port 8082), Analytics
+Service (port 8083), and Billing Service (port 8084).
+
+The Gateway Service uses Spring Cloud Gateway and requires a minimum of 512MB RAM.
+All inter-service communication is handled via RabbitMQ running on port 5672.
+The default exchange name is "aurora.exchange" and the dead letter queue is
+"aurora.dlq".
+
+Database configuration: each service has its own PostgreSQL schema. The naming
+convention is aurora_{service_name}. For example, the User Management Service
+uses the schema aurora_user_management. Connection pooling is managed by HikariCP
+with a maximum pool size of 15 connections per service.
+
+Authentication is handled by the User Management Service using JWT tokens with
+RS256 algorithm. Access tokens expire after 30 minutes, refresh tokens after 7 days.
+The public key for token verification is available at
+http://user-service:8081/.well-known/jwks.json.
+
+Deployment: all services are containerized using Docker and orchestrated with
+Kubernetes. The production cluster runs on 3 nodes with a minimum of 8GB RAM each.
+Horizontal Pod Autoscaler is configured to scale between 2 and 10 replicas based
+on CPU utilization threshold of 70%.
+
+The lead developer is Maria Chen (maria.chen@novatech.example.com).
+The project manager is Alex Kumar (alex.kumar@novatech.example.com).
+Weekly sync meetings are held every Wednesday at 14:00 CET.

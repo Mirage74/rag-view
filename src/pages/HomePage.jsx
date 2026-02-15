@@ -1,15 +1,30 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
   logoutUser,
   clearDeleteStatus,
 } from "../features/slices/details-slice";
+import { uploadFilesWithProgress } from "../features/slices/upload-slice";
 import fetchDeleteUploaded from "../features/fetch-async/fetchDeleteUploaded";
-import { TOKEN_UNDEFINED } from "../features/constants";
+import fetchLoginUser from "../features/fetch-async/fetchLoginUser";
+import {
+  TOKEN_UNDEFINED,
+  GUEST_EMAIL,
+  GUEST_PASSWORD,
+} from "../features/constants";
+
+const GUEST_USERNAME = "Guest";
+const DEFAULT_CONTEXT_FILE = "/guest-example.txt";
+const EXAMPLE_QUESTIONS_FILE = "/context-questions.txt";
 
 function HomePage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  const [view, setView] = useState(null);
+  const [fileContent, setFileContent] = useState("");
+  const [uploadingDefault, setUploadingDefault] = useState(false);
 
   const token = useSelector((state) => state.userDetails.token);
   const userId = useSelector((state) => state.userDetails.userId);
@@ -26,6 +41,18 @@ function HomePage() {
     token !== TOKEN_UNDEFINED &&
     token.trim() !== "";
 
+  const isGuest =
+    userEmail === GUEST_EMAIL && userName === GUEST_USERNAME;
+  const hasDefaultFile = loadedFiles.some(
+    (f) => f.fileName === "guest-example.txt",
+  );
+  const showUploadDefault = isGuest && !hasDefaultFile;
+  const showViewExamples = isGuest && hasDefaultFile;
+
+  const handleGuestLogin = () => {
+    dispatch(fetchLoginUser({ email: GUEST_EMAIL, password: GUEST_PASSWORD }));
+  };
+
   const handleLogout = () => {
     dispatch(logoutUser());
   };
@@ -39,6 +66,50 @@ function HomePage() {
   const handleClearDeleteStatus = () => {
     dispatch(clearDeleteStatus());
   };
+
+  const handleUploadDefaultFile = async () => {
+    setUploadingDefault(true);
+    try {
+      const res = await fetch(DEFAULT_CONTEXT_FILE);
+      const text = await res.text();
+      const file = new File([text], "guest-example.txt", {
+        type: "text/plain",
+      });
+      dispatch(uploadFilesWithProgress([file]));
+      navigate("/upload");
+    } finally {
+      setUploadingDefault(false);
+    }
+  };
+
+  const handleViewFile = async (filePath, viewName) => {
+    const res = await fetch(filePath);
+    const text = await res.text();
+    setFileContent(text);
+    setView(viewName);
+  };
+
+  // File viewer screen
+  if (view) {
+    const title =
+      view === "context" ? "Example Context File" : "Example Questions";
+    return (
+      <div className="flex items-center justify-center h-screen bg-slate-950 p-4 overflow-hidden">
+        <div className="w-full max-w-md bg-slate-900/90 rounded-2xl border border-slate-700/60 shadow-xl p-6 flex flex-col max-h-[90vh]">
+          <h2 className="text-lg font-semibold text-white mb-3">{title}</h2>
+          <pre className="flex-1 overflow-y-auto text-xs text-slate-300 bg-slate-800/60 rounded-xl p-4 border border-slate-700/40 whitespace-pre-wrap">
+            {fileContent}
+          </pre>
+          <button
+            onClick={() => setView(null)}
+            className="mt-4 w-full py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 active:bg-slate-800 text-sm font-medium text-white transition-colors"
+          >
+            Back
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex items-center justify-center h-screen bg-slate-950 p-4 overflow-hidden">
@@ -67,7 +138,7 @@ function HomePage() {
               Login
             </button>
             <button
-              onClick={() => navigate("/guest-login")}
+              onClick={handleGuestLogin}
               className="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-sm font-medium text-white shadow-md shadow-emerald-500/25 transition-colors"
             >
               Login as guest
@@ -162,7 +233,7 @@ function HomePage() {
               )}
             </div>
 
-            {/* Action Buttons - 2x2 Grid */}
+            {/* Action Buttons */}
             <div className="grid grid-cols-2 gap-2">
               <button
                 onClick={() => navigate("/upload")}
@@ -170,12 +241,41 @@ function HomePage() {
               >
                 Upload TXT
               </button>
+              {showUploadDefault && (
+                <button
+                  onClick={handleUploadDefaultFile}
+                  disabled={uploadingDefault}
+                  className="py-2.5 rounded-xl bg-teal-500 hover:bg-teal-400 active:bg-teal-600 text-xs font-medium text-white shadow-md shadow-teal-500/25 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {uploadingDefault ? "Uploading..." : "Upload Default Context"}
+                </button>
+              )}
               <button
                 onClick={() => navigate("/rag")}
                 className="py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 active:bg-slate-800 text-xs font-medium text-white transition-colors"
               >
                 New RAG Query
               </button>
+              {showViewExamples && (
+                <>
+                  <button
+                    onClick={() =>
+                      handleViewFile(DEFAULT_CONTEXT_FILE, "context")
+                    }
+                    className="py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 active:bg-cyan-700 text-xs font-medium text-white transition-colors"
+                  >
+                    View Example Context
+                  </button>
+                  <button
+                    onClick={() =>
+                      handleViewFile(EXAMPLE_QUESTIONS_FILE, "questions")
+                    }
+                    className="py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 active:bg-violet-700 text-xs font-medium text-white transition-colors"
+                  >
+                    View Example Questions
+                  </button>
+                </>
+              )}
               <button
                 onClick={handleDeleteUploaded}
                 disabled={deleting || loadedFiles.length === 0}

@@ -5,4 +5,5 @@ export const initialState = {
   activeChatId: NO_ACTIVE_CHAT_ID,
   activeTitle: "",
   messages: [],
+  isWaitingResponse: false,
 };

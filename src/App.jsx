@@ -8,7 +8,6 @@ import RootLayout from "./pages/RootLayout";
 import HomePage from "./pages/HomePage";
 import RegisterPage from "./pages/RegisterPage";
 import LoginPage from "./pages/LoginPage";
-import GuestLoginPage from "./pages/GuestLoginPage";
 import UploadPage from "./pages/UploadPage";
 import RagPage from "./pages/RagPage";
 
@@ -20,7 +19,6 @@ const router = createBrowserRouter([
       { index: true, element: <HomePage /> },
       { path: "register", element: <RegisterPage /> },
       { path: "login", element: <LoginPage /> },
-      { path: "guest-login", element: <GuestLoginPage /> },
       { path: "upload", element: <UploadPage /> },
       { path: "rag", element: <RagPage /> },
     ],
@@ -38,7 +36,11 @@ function App() {
     token.trim() !== "";
 
   useEffect(() => {
-    if (!auth || bootstrappedRef.current) return;
+    if (!auth) {
+      bootstrappedRef.current = false;
+      return;
+    }
+    if (bootstrappedRef.current) return;
     bootstrappedRef.current = true;
     dispatch(fetchUserProfile());
   }, [auth, dispatch]);

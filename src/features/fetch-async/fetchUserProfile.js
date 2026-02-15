@@ -11,27 +11,25 @@ import {
 const fetchUserProfile = createAsyncThunk(
   "userDetails/fetchUserProfile",
   async (_, thunkAPI) => {
-    const res = await fetchWithAuth(
-      BASE_URL + PREFIX_USERS + PREFIX_USERINFO,
-      { method: METHOD_GET_QUERY },
-      thunkAPI
-    );
+    try {
+      const res = await fetchWithAuth(
+        BASE_URL + PREFIX_USERS + PREFIX_USERINFO,
+        { method: METHOD_GET_QUERY },
+        thunkAPI,
+      );
 
-    const text = await res.text().catch(() => "");
-    if (!res.ok) {
-      //if (text === TOKEN_EXPIRED) {
+      const text = await res.text().catch(() => "");
+      if (!res.ok) {
+        thunkAPI.dispatch(logoutUser());
+        return;
+      }
+
+      const data = JSON.parse(text);
+      return data;
+    } catch {
       thunkAPI.dispatch(logoutUser());
-      return;
-      //}
-      //return thunkAPI.rejectWithValue({
-      //        status: res.status,
-      //      message: text || ERROR_RESPONSE_NOT_OK,
-      //  });
     }
-
-    const data = JSON.parse(text);
-    return data;
-  }
+  },
 );
 
 export default fetchUserProfile;

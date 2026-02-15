@@ -1,28 +1,69 @@
-import { useState } from "react";
+import { useRef, useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import fetchCreateNewChat from "../../../features/fetch-async/fetchCreateNewChat";
 import fetchAddNewUserEntry from "../../../features/fetch-async/fetchAddNewUserEntry";
+import fetchGetChat from "../../../features/fetch-async/fetchGetChat";
 import { generateTitleFromMessage } from "../utils/titleUtils";
+import { MESSAGE_ROLE } from "../../../features/constants";
 
 const ChatArea = () => {
   const dispatch = useDispatch();
   const [inputValue, setInputValue] = useState("");
   const { loadedFiles } = useSelector((state) => state.userDetails);
   const activeChatId = useSelector((state) => state.chats.activeChatId);
+  const messages = useSelector((state) => state.chats.messages);
+  const isWaitingResponse = useSelector(
+    (state) => state.chats.isWaitingResponse,
+  );
+  const messagesEndRef = useRef(null);
+  const { isUseOnlyContextSearch, topK, topP } = useSelector(
+    (state) => state.ragConfig,
+  );
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   const handleSendMessage = () => {
     const trimmedInput = inputValue.trim();
     if (!trimmedInput) return;
 
     if (!activeChatId) {
-      // No active chat - create a new one with auto-generated title
+      // No active chat - create a new one, then send the entry
       const title = generateTitleFromMessage(trimmedInput);
-      dispatch(fetchCreateNewChat(title, trimmedInput));
+      dispatch(fetchCreateNewChat(title)).then((result) => {
+        if (fetchCreateNewChat.fulfilled.match(result)) {
+          const newChatId = result.payload.id;
+          dispatch(
+            fetchAddNewUserEntry({
+              chatId: newChatId,
+              content: trimmedInput,
+              onlyContext: isUseOnlyContextSearch,
+              topK,
+              topP,
+            }),
+          ).then((entryResult) => {
+            if (fetchAddNewUserEntry.fulfilled.match(entryResult)) {
+              dispatch(fetchGetChat(newChatId));
+            }
+          });
+        }
+      });
     } else {
       // Active chat exists - send message to it
       dispatch(
-        fetchAddNewUserEntry({ chatId: activeChatId, content: trimmedInput }),
-      );
+        fetchAddNewUserEntry({
+          chatId: activeChatId,
+          content: trimmedInput,
+          onlyContext: isUseOnlyContextSearch,
+          topK,
+          topP,
+        }),
+      ).then((result) => {
+        if (fetchAddNewUserEntry.fulfilled.match(result)) {
+          dispatch(fetchGetChat(activeChatId));
+        }
+      });
     }
 
     setInputValue("");
@@ -61,13 +102,49 @@ const ChatArea = () => {
 
   return (
     <div className="bg-slate-800/40 rounded-xl p-8 border border-slate-700/40">
-      {/* Messages area - placeholder for future messages */}
-      <div className="min-h-50 flex items-center justify-center mb-6">
-        {!activeChatId ? (
-          <p className="text-slate-500">Start a new conversation...</p>
+      {/* Messages area */}
+      <div className="min-h-50 max-h-[60vh] overflow-y-auto mb-6 space-y-3">
+        {!activeChatId || messages.length === 0 ? (
+          <div className="flex items-center justify-center h-full">
+            <p className="text-slate-500">
+              {!activeChatId
+                ? "Start a new conversation..."
+                : "No messages yet"}
+            </p>
+          </div>
         ) : (
-          <p className="text-slate-500">Chat messages will appear here</p>
+          messages.map((msg, index) => {
+            const isUser = msg.role === MESSAGE_ROLE.USER;
+            return (
+              <div
+                key={index}
+                className={`flex ${isUser ? "justify-end" : "justify-start"}`}
+              >
+                <div
+                  className={`max-w-[75%] px-4 py-2.5 rounded-xl text-sm whitespace-pre-wrap ${
+                    isUser
+                      ? "bg-indigo-600/60 text-white rounded-br-sm"
+                      : "bg-slate-700/60 text-slate-200 rounded-bl-sm"
+                  }`}
+                >
+                  {msg.content}
+                </div>
+              </div>
+            );
+          })
         )}
+        {isWaitingResponse && (
+          <div className="flex justify-start">
+            <div className="bg-slate-700/60 px-4 py-2.5 rounded-xl rounded-bl-sm">
+              <div className="flex gap-1.5">
+                <span className="w-2 h-2 bg-slate-400 rounded-full animate-bounce [animation-delay:0ms]" />
+                <span className="w-2 h-2 bg-slate-400 rounded-full animate-bounce [animation-delay:150ms]" />
+                <span className="w-2 h-2 bg-slate-400 rounded-full animate-bounce [animation-delay:300ms]" />
+              </div>
+            </div>
+          </div>
+        )}
+        <div ref={messagesEndRef} />
       </div>
 
       {/* Input area */}

@@ -21,8 +21,9 @@ function RegisterPage() {
   );
 
   useEffect(() => {
+    if (loading) return;
+
     if (
-      !loading &&
       userName !== USER_NAME_UNDEFINED &&
       userEmail !== USER_EMAIL_UNDEFINED
     ) {

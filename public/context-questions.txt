@@ -1,0 +1,31 @@
+Example Questions and Expected Answers
+=======================================
+
+These questions are based on the default context file (guest-example.txt).
+Use them to test RAG query behavior with different settings.
+
+--- Questions with answers found in context ---
+
+1. What port does the Notification Service run on?
+   Expected answer: 8082
+
+2. How long are access tokens valid in Project Aurora?
+   Expected answer: 30 minutes
+
+3. What is the database naming convention?
+   Expected answer: aurora_{service_name}
+
+4. Who is the lead developer?
+   Expected answer: Maria Chen
+
+5. What message broker does Aurora use?
+   Expected answer: RabbitMQ on port 5672
+
+6. What happens when CPU goes above 70%?
+   Expected answer: HPA scales pods, from 2 to 10 replicas
+
+--- Question to test onlyContext mode ---
+
+7. What is the capital of France?
+   With onlyContext=true: should respond that the answer is not found in context
+   With onlyContext=false: should answer "Paris"

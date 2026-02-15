@@ -47,8 +47,20 @@ export default function UploadPage() {
   const [selectedFiles, setSelectedFiles] = useState([]);
 
   useEffect(() => {
-    dispatch(resetUploadState());
-  }, [dispatch]);
+    if (!uploading && !success) {
+      dispatch(resetUploadState());
+    }
+  }, [dispatch, uploading, success]);
+
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => {
+        dispatch(resetUploadState());
+        navigate("/");
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [success, dispatch, navigate]);
 
   const handleFilesChange = (event) => {
     const files = Array.from(event.target.files || []);
